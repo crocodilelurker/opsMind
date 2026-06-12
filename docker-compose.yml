@@ -3,6 +3,13 @@ services:
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
+    depends_on:
+      - auth-service
     ports:
       - "8000:8000"
+    restart: unless-stopped
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
     restart: unless-stopped
