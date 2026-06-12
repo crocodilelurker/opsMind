@@ -1,4 +1,18 @@
 services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: opsmind_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres_default
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -7,9 +21,21 @@ services:
       - auth-service
     ports:
       - "8000:8000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000/
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     restart: unless-stopped
   auth-service:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_auth
+      - PORT=8000
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     restart: unless-stopped
+
+volumes:
+  postgres_data:
