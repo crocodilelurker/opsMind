@@ -6,7 +6,7 @@ dotenv.config();
 const app = express();
 
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:8000";
-
+const PROJECT_SERVICE_URL = process.env.PROJECT_SERVICE_URL || "http://project-service:8000";
 app.use((req, res, next) => {
     console.log(`[gateway intercept] ${req.method} request recieved for ${req.url}`)
     next();
@@ -25,17 +25,34 @@ app.use("/api/auth", createProxyMiddleware(
         }
     }
 ));
-app.use('/api/v1/agents', authenticateRequest, createProxyMiddleware({
+app.use("/api/projects",authenticateRequest,createProxyMiddleware({
+    target:PROJECT_SERVICE_URL,
+    changeOrigin:true,
+    pathRewrite:{
+        "^/api/projects":"",
+    },
+    on:{
+        proxyReq: (proxyReq, req, res) => {
+            if (req.user) {
+                proxyReq.setHeader("X-User-Id", String(req.user.id));
+            }
+        }
+    },
+    onError:(err,req,res)=>{
+        console.log(`[gateway error:] connection failed to Project Service ${err.message}`)
+        res.status(503).json({ error: "Gateway Error, Project Service down" })
+    }
+}))
+app.use('/api/agents', authenticateRequest, createProxyMiddleware({
     target: process.env.AGENT_SERVICE_URL || 'http://agent-service:8000',
     changeOrigin: true,
     pathRewrite: {
-        '^/api/v1/agents': '/agents',
+        '^/api/agents': '',
     },
     on: {
         proxyReq: (proxyReq, req, res) => {
             if (req.user) {
                 proxyReq.setHeader('X-User-Id', String(req.user.id));
-                proxyReq.setHeader('X-User-Role', String(req.user.role));
             }
         }
     },

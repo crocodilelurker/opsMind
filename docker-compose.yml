@@ -37,5 +37,17 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     restart: unless-stopped
 
+  project-service:
+    build:
+      context: ./services/project-service
+      dockerfile: Dockerfile
+    depends_on:
+      - auth-service
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_project
+      - PORT=8000
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    restart: unless-stopped
+
 volumes:
   postgres_data:
