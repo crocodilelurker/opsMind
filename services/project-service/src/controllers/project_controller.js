@@ -14,6 +14,35 @@
 import response from "../utils/responseHandler.js";
 import { query } from "../config/db.js";
 
+const attachLinks = async (req, res) => {
+    try {
+        const { path } = req.body;
+        const { projectId } = req.params;
+        if (!path || !projectId)
+            return response(res, 400, "All fields are required", null);
+        const fetchProject = await query('SELECT * FROM projects WHERE id = $1', [projectId]);
+        if (fetchProject.rows.length === 0) {
+            return response(res, 404, "Project not found", null);
+        }
+        const project = fetchProject.rows[0];
+        if (String(project.owner_id) !== String(req.headers["x-user-id"])) {
+            return response(res, 403, "You are not  uthorized to perform this action", null);
+        }
+        const result = await query(
+            `INSERT INTO project_integrations (project_id, repository_path, created_at)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (project_id)
+             DO UPDATE SET repository_path = EXCLUDED.repository_path, created_at = EXCLUDED.created_at
+             RETURNING *`,
+            [projectId, path, new Date()]
+        );
+        return response(res, 201, "Attachment added successfully", result.rows[0]);
+    } catch (error) {
+        console.log(`[project-service] error `, error);
+        return response(res, 500, "intenal server error at project-service");
+    }
+}
+
 const createProject = async (req, res) => {
     const { name, description } = req.body;
     const ownerId = req.headers["x-user-id"];
@@ -74,5 +103,6 @@ const getAllProjectsByUserId = async (req, res) => {
 export {
     createProject,
     getProject,
-    getAllProjectsByUserId
+    getAllProjectsByUserId,
+    attachLinks
 }

@@ -11,7 +11,9 @@ services:
       - POSTGRES_DB=postgres_default
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql:ro
+      - ./init-auth-schema.sql:/docker-entrypoint-initdb.d/02-init-auth-schema.sql:ro
+      - ./init-project-schema.sql:/docker-entrypoint-initdb.d/03-init-project-schema.sql:ro
 
   api-gateway:
     build:
