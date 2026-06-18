@@ -49,6 +49,9 @@ services:
       - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_project
       - PORT=8000
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     restart: unless-stopped
 
 volumes:
