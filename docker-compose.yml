@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: postgres:16-alpine
+    image: timescale/timescaledb-ha:pg16
     container_name: opsmind_postgres
     ports:
       - "5433:5432"
@@ -14,6 +14,7 @@ services:
       - ./init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql:ro
       - ./init-auth-schema.sql:/docker-entrypoint-initdb.d/02-init-auth-schema.sql:ro
       - ./init-project-schema.sql:/docker-entrypoint-initdb.d/03-init-project-schema.sql:ro
+      - ./init-knowledge-schema.sql:/docker-entrypoint-initdb.d/04-init-knowledge-schema.sql:ro
 
   api-gateway:
     build:
@@ -38,7 +39,6 @@ services:
       - PORT=8000
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     restart: unless-stopped
-
   project-service:
     build:
       context: ./services/project-service
@@ -52,6 +52,17 @@ services:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    restart: unless-stopped
+
+  knowledge-service:
+    build:
+      context: ./services/knowledge-service
+      dockerfile: Dockerfile
+    depends_on:
+      - auth-service
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_knowledge
+      - PORT=8000
     restart: unless-stopped
 
 volumes:

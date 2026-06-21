@@ -1,0 +1,9 @@
+{
+  "executionEnvironments": [
+    {
+      "root": "services/knowledge-service",
+      "venvPath": "services/knowledge-service",
+      "venv": "venv"
+    }
+  ]
+}
