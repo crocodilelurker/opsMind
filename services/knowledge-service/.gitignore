@@ -1,16 +1,18 @@
-venv
+# Environments
 .env
+.venv/
+venv/
+
+# Python cache and compiled files
 __pycache__/
 *.py[cod]
 *$py.class
-__pycache__
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.env
+
+# Testing / Coverage
 .pytest_cache/
 .mypy_cache/
 .coverage
+
+# Build and distribution
 dist/
 build/
