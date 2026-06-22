@@ -25,7 +25,7 @@ app.use("/api/auth", createProxyMiddleware(
         }
     }
 ));
-app.use("/api/knowledge", createProxyMiddleware({ // removed authenticateRequest for testing
+app.use("/api/knowledge", authenticateRequest, createProxyMiddleware({
     target: KNOWLEDGE_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {

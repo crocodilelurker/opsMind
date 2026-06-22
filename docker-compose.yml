@@ -64,6 +64,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_knowledge
       - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     restart: unless-stopped
 
 volumes:
