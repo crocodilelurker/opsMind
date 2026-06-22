@@ -60,6 +60,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - auth-service
+      - postgres
     environment:
       - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_knowledge
       - PORT=8000
