@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { authenticateRequest } from "./dependencyFunctions.js";
 dotenv.config();
 const app = express();
-
+const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || "http://knowledge-service:8000";
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:8000";
 const PROJECT_SERVICE_URL = process.env.PROJECT_SERVICE_URL || "http://project-service:8000";
 app.use((req, res, next) => {
@@ -25,20 +25,38 @@ app.use("/api/auth", createProxyMiddleware(
         }
     }
 ));
-app.use("/api/projects",authenticateRequest,createProxyMiddleware({
-    target:PROJECT_SERVICE_URL,
-    changeOrigin:true,
-    pathRewrite:{
-        "^/api/projects":"",
+app.use("/api/knowledge", createProxyMiddleware({ // removed authenticateRequest for testing
+    target: KNOWLEDGE_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {
+        "^/api/knowledge": ""
     },
-    on:{
+    on: {
         proxyReq: (proxyReq, req, res) => {
             if (req.user) {
-                proxyReq.setHeader("X-User-Id", String(req.user.id));
+                proxyReq.setHeader("x-user-id", String(req.user.id));
+            }
+        },
+        onError: (err, req, res) => {
+            console.log(`[gateway error:] connection failed to knowledge Service ${err.message}`)
+            res.status(503).json({ error: "Gateway Error, Knowledge Service down" })
+        }
+    }
+}))
+app.use("/api/projects", authenticateRequest, createProxyMiddleware({
+    target: PROJECT_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {
+        "^/api/projects": "",
+    },
+    on: {
+        proxyReq: (proxyReq, req, res) => {
+            if (req.user) {
+                proxyReq.setHeader("x-user-id", String(req.user.id));
             }
         }
     },
-    onError:(err,req,res)=>{
+    onError: (err, req, res) => {
         console.log(`[gateway error:] connection failed to Project Service ${err.message}`)
         res.status(503).json({ error: "Gateway Error, Project Service down" })
     }
