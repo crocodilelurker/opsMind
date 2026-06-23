@@ -15,7 +15,6 @@ services:
       - ./init-auth-schema.sql:/docker-entrypoint-initdb.d/02-init-auth-schema.sql:ro
       - ./init-project-schema.sql:/docker-entrypoint-initdb.d/03-init-project-schema.sql:ro
       - ./init-knowledge-schema.sql:/docker-entrypoint-initdb.d/04-init-knowledge-schema.sql:ro
-
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -26,6 +25,9 @@ services:
       - "8000:8000"
     environment:
       - AUTH_SERVICE_URL=http://auth-service:8000/
+      - PROJECT_SERVICE_URL=http://project-service:8000/
+      - KNOWLEDGE_SERVICE_URL=http://knowledge-service:8000/
+      - AGENT_SERVICE_URL=http://agent-service:8000/
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     restart: unless-stopped
   auth-service:
@@ -53,7 +55,6 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
     restart: unless-stopped
-
   knowledge-service:
     build:
       context: ./services/knowledge-service
@@ -66,6 +67,17 @@ services:
       - PORT=8000
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     restart: unless-stopped
-
+  agent-service:
+    build:
+      context: ./services/agent-service
+      dockerfile: Dockerfile
+    depends_on:
+      - auth-service
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@postgres:5432/opsmind_agent
+      - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
 volumes:
   postgres_data:

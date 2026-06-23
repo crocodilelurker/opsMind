@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { authenticateRequest } from "./dependencyFunctions.js";
 dotenv.config();
 const app = express();
+const AGENT_SERVICE_URL = process.env.AGENT_SERVICE_URL || "http://agent-service:8000";
 const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || "http://knowledge-service:8000";
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:8000";
 const PROJECT_SERVICE_URL = process.env.PROJECT_SERVICE_URL || "http://project-service:8000";
@@ -62,7 +63,7 @@ app.use("/api/projects", authenticateRequest, createProxyMiddleware({
     }
 }))
 app.use('/api/agents', authenticateRequest, createProxyMiddleware({
-    target: process.env.AGENT_SERVICE_URL || 'http://agent-service:8000',
+    target: AGENT_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
         '^/api/agents': '',
