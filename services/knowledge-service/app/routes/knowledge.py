@@ -84,9 +84,9 @@ async def query_resp(payload: KnowlegdeQueryRequest, x_user_id: str | None = Hea
             detail=f"Semantic query execution failed: {str(e)}"
         )
 
-@router.get("/config")
-async def status():
-    return {
-        "database_url": settings.DATABASE_URL,
-        "gemini_api_key": settings.GEMINI_API_KEY
-    }
+# @router.get("/config")
+# async def status():
+#     return {
+#         "database_url": settings.DATABASE_URL,
+#         "gemini_api_key": settings.GEMINI_API_KEY
+#     }
