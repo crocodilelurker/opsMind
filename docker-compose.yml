@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: timescale/timescaledb-ha:pg16
     container_name: opsmind_postgres
